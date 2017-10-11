@@ -11,6 +11,9 @@ def avg(x, name):
     df['Avg 2016 '+name] = df[x[36:48]].mean(axis = 1)
     df['Avg 2017 '+name] = df[x[48:52]].mean(axis = 1)
 
+def total_avg(x, name):
+    df['Total Avg '+name] = df[x[:]].mean(axis = 1)
+
 # Importing the libraries
 import numpy as np
 import pandas as pd
@@ -74,3 +77,8 @@ for x in range(0,52):
 avg(sales,'Sales')
 avg(rent,'Rent')
 avg(td,'TD')
+
+# Calculating Total Avg for Sales, Rent and TDR
+total_avg(sales, 'Sales')
+total_avg(rent, 'Rent')
+total_avg(td, 'TD')

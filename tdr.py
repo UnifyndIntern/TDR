@@ -14,6 +14,58 @@ def avg(x, name):
 def total_avg(x, name):
     df['Total Avg '+name] = df[x[:]].mean(axis = 1)
 
+def count(df):
+    count = df.index.value_counts().to_frame()
+    count.reset_index(inplace = True)
+    count.columns = ['Column', 'Counts']
+    count['Divide'] = count['Counts'] // 5
+    count['Extra'] = count['Counts'] % 5
+    return count
+
+def pivot(df, values, column):
+    """
+    df :
+        Data Type: Data Frame
+        
+        Dataframe to be pivoted
+    values : 
+        Data Type: String (To be written inside Double Single quotes)
+        
+        Value according to which the table will be pivoted
+    column : 
+        Data Type: String (To be written inside Double Single quotes)
+        
+        To set Category/Floor as the column
+    
+    Example:
+        pivot = pivot(floor_2014, 'Avg 2014 TD', 'Floor')
+    """
+    df = df[df[values].notnull()]
+    pivot = df.pivot_table(values = values, index = [column, 'Brand Name'])
+    pivot = pivot.reset_index().sort_values([column, values]).set_index([column])
+    return pivot
+
+def multiple(count, pivot_df):
+    pivot_df['Multiple'] = np.nan
+    multiple = [5, 4, 3, 2, 1, 1]
+    length = len(count)
+    i = 0
+    for i in range(0,length):
+        x = 0
+        y = count['Divide'][i]
+        a = 0
+        while((y <= count['Counts'][i]) & (a < 6)):
+            print(i,a,x,y)
+            pivot_df.ix[count['Column'][i]]['Multiple'][x:y] = multiple[a]
+            x = y
+            a = a + 1
+            if y > count['Counts'][i]:
+                y = y + count['Extra'][i]
+            else:
+                y = y + count['Divide'][i]
+    pivot_df['Multiple'] = pivot_df['Multiple'].replace(np.nan, 1) 
+    return pivot_df
+
 # Importing the libraries
 import numpy as np
 import pandas as pd
@@ -22,6 +74,7 @@ import matplotlib.pyplot as plt
 
 # Importing data
 df_temp = pd.read_excel('Master Sales Data July 2017.xlsx')
+df_temp = df_temp.iloc[:327,:]
 
 # Delete Unnecessary Columns in Data
 df = df_temp.drop(['Sr. No.'], axis = 1)
@@ -82,3 +135,45 @@ avg(td,'TD')
 total_avg(sales, 'Sales')
 total_avg(rent, 'Rent')
 total_avg(td, 'TD')
+
+# Floor DataFrame
+final_df = pd.DataFrame(data = df, columns = ['Brand Name', 'Floor', 'Category - New format', 'Avg 2013 TD', 'Avg 2014 TD', 'Avg 2015 TD', 'Avg 2016 TD', 'Avg 2017 TD'])
+floor_2013 = pivot(final_df, 'Avg 2013 TD', 'Floor')
+count_2013 = count(floor_2013)
+a = multiple(count_2013,floor_2013)
+"""
+cat_2013 = pivot(final_df, 'Avg 2013 TD', 'Category - New format')
+floor_2013 = pd.DataFrame()
+floor_2013 = floor[floor['Avg 2013 TD'].notnull()]
+floor_2013 = floor_2013.iloc[:,0:3]
+floor_2013['Decision'] = floor_2013['Avg 2013 TD'] > 20
+
+
+floor_2014 = pd.DataFrame()
+floor_2014 = floor[floor['Avg 2014 TD'].notnull()]
+floor_2014 = floor_2014[['Brand Name', 'Floor', 'Avg 2014 TD']]
+
+floor_2015 = pd.DataFrame()
+floor_2015 = floor[floor['Avg 2015 TD'].notnull()]
+floor_2015 = floor_2015[['Brand Name', 'Floor', 'Avg 2015 TD']]
+
+floor_2016 = pd.DataFrame()
+floor_2016 = floor[floor['Avg 2016 TD'].notnull()]
+floor_2016 = floor_2016[['Brand Name', 'Floor', 'Avg 2016 TD']]
+
+floor_2017 = pd.DataFrame()
+floor_2017 = floor[floor['Avg 2017 TD'].notnull()]
+floor_2017 = floor_2017[['Brand Name', 'Floor', 'Avg 2017 TD']]
+
+pivot = floor_2013.pivot_table(values = 'Avg 2013 TD', index = ['Floor', 'Brand Name'])
+
+sort_pivot = pivot.reset_index().sort_values(['Floor','Avg 2013 TD'])
+
+pivot_2014 = pivot(floor_2014, 'Avg 2014 TD', 'Floor')
+
+count_2013 = count(cat_2013)
+count_2014 = count(floor_2014, 'Floor')
+
+sort_pivot['Multiple'] = np.nan
+sort_pivot.ix[count_2013['Column'][0]]['Multiple'][0:13] = 1
+"""
